@@ -1,0 +1,47 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+// Function to calculate the total head movement for FCFS
+int fcfsDiskScheduling(int requests[], int num_requests, int initial_position) {
+    int total_head_movement = 0;
+    int current_position = initial_position;
+
+    printf("Disk Scheduling Order (FCFS):\n");
+
+    // Process each request in the order they are given
+    for (int i = 0; i < num_requests; i++) {
+        printf("Move from track %d to track %d\n", current_position, requests[i]);
+        total_head_movement += abs(requests[i] - current_position);  // Add the head movement
+        current_position = requests[i];  // Update the current position
+    }
+
+    return total_head_movement;
+}
+
+int main() {
+    int num_requests, initial_position;
+
+    // Input the number of requests and initial disk head position
+    printf("Enter the number of disk requests: ");
+    scanf("%d", &num_requests);
+
+    int requests[num_requests];
+
+    // Input the track numbers for the requests
+    printf("Enter the track numbers for the requests:\n");
+    for (int i = 0; i < num_requests; i++) {
+        scanf("%d", &requests[i]);
+    }
+
+    // Input the initial position of the disk head
+    printf("Enter the initial position of the disk head: ");
+    scanf("%d", &initial_position);
+
+    // Calculate the total head movement using FCFS
+    int total_head_movement = fcfsDiskScheduling(requests, num_requests, initial_position);
+
+    // Output the total head movement
+    printf("\nTotal head movement: %d\n", total_head_movement);
+
+    return 0;
+}
