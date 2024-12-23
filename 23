@@ -1,0 +1,32 @@
+#include <stdio.h>
+
+#define MAX_BLOCKS 10
+#define MAX_PROCESSES 5
+
+// Structure to represent a memory block
+struct Block {
+    int size;    // Size of the block
+    int isFree;  // 1 if the block is free, 0 if it is allocated
+};
+
+// Function to allocate memory using First-Fit algorithm
+void firstFit(struct Block blocks[], int m, int processes[], int n) {
+    // Array to store allocation of processes
+    int allocation[n];
+
+    // Initialize allocation array to -1 (indicating no allocation)
+    for (int i = 0; i < n; i++) {
+        allocation[i] = -1;
+    }
+
+    // Traverse each process
+    for (int i = 0; i < n; i++) {
+        // Find the first block that is large enough for the current process
+        for (int j = 0; j < m; j++) {
+            if (blocks[j].isFree == 1 && blocks[j].size >= processes[i]) {
+                allocation[i] = j;
+                blocks[j].size -= processes[i];  // Decrease the size of the block
+                if (blocks[j].size == 0) {
+                    blocks[j].isFree = 0;  // Mark block as allocated if no space left
+                }
+                break;  //
