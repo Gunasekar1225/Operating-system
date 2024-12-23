@@ -1,0 +1,60 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_RECORDS 10
+#define RECORD_SIZE 50
+
+// Structure to represent a file record
+typedef struct {
+    char data[RECORD_SIZE]; // Record data (could be a string, number, etc.)
+} FileRecord;
+
+// Function to simulate creating and initializing a file
+void createFile(FileRecord *file, int *fileSize) {
+    // Initialize the file with some records
+    for (int i = 0; i < MAX_RECORDS; i++) {
+        printf("Enter data for record %d: ", i + 1);
+        fgets(file[i].data, RECORD_SIZE, stdin);
+        // Remove the newline character added by fgets
+        file[i].data[strcspn(file[i].data, "\n")] = '\0';
+    }
+    *fileSize = MAX_RECORDS;
+}
+
+// Function to simulate sequential access to file records
+void readRecord(FileRecord *file, int recordNumber) {
+    if (recordNumber < 1 || recordNumber > MAX_RECORDS) {
+        printf("Error: Record number out of range.\n");
+        return;
+    }
+    printf("Record %d: %s\n", recordNumber, file[recordNumber - 1].data);
+}
+
+// Function to simulate sequentially reading all records of the file
+void readAllRecords(FileRecord *file, int fileSize) {
+    printf("\nReading all records in sequence:\n");
+    for (int i = 0; i < fileSize; i++) {
+        printf("Record %d: %s\n", i + 1, file[i].data);
+    }
+}
+
+int main() {
+    FileRecord file[MAX_RECORDS]; // Simulated file with a maximum of 10 records
+    int fileSize = 0; // Variable to keep track of the number of records in the file
+
+    // Create the file and initialize it with records
+    createFile(file, &fileSize);
+
+    // Read a specific record (sequential access)
+    int recordNumber;
+    printf("\nEnter the record number to access (1-%d): ", fileSize);
+    scanf("%d", &recordNumber);
+    getchar();  // To clear the newline character left by scanf
+    readRecord(file, recordNumber);
+
+    // Read all records sequentially
+    readAllRecords(file, fileSize);
+
+    return 0;
+}
