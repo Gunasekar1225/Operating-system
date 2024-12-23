@@ -1,0 +1,44 @@
+#include <stdio.h>
+
+typedef struct {
+    int process_id;
+    int burst_time;
+    int waiting_time;
+    int turnaround_time;
+} Process;
+
+// Function to sort the processes based on burst time
+void sort_by_burst_time(Process processes[], int n) {
+    Process temp;
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = i + 1; j < n; j++) {
+            if (processes[i].burst_time > processes[j].burst_time) {
+                // Swap the processes[i] and processes[j]
+                temp = processes[i];
+                processes[i] = processes[j];
+                processes[j] = temp;
+            }
+        }
+    }
+}
+
+// Function to calculate waiting time and turnaround time
+void calculate_waiting_and_turnaround_times(Process processes[], int n) {
+    // Waiting time for the first process is 0
+    processes[0].waiting_time = 0;
+
+    // Calculate waiting time for each process
+    for (int i = 1; i < n; i++) {
+        processes[i].waiting_time = processes[i - 1].waiting_time + processes[i - 1].burst_time;
+    }
+
+    // Calculate turnaround time for each process
+    for (int i = 0; i < n; i++) {
+        processes[i].turnaround_time = processes[i].waiting_time + processes[i].burst_time;
+    }
+}
+
+// Function to print the results
+void print_results(Process processes[], int n) {
+    printf("\nProcess Details:\n");
+    printf("PID\tB
