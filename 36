@@ -1,0 +1,111 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <string.h>
+
+#define MAX_BLOCKS 5      // Maximum number of blocks in the file
+#define BLOCK_SIZE 50     // Size of each block
+
+// Structure to represent a disk block
+typedef struct Block {
+    char data[BLOCK_SIZE];      // Data of the block
+    struct Block* nextBlock;    // Pointer to the next block in the linked list
+} Block;
+
+// Structure to represent a file (with pointers to the first and last blocks)
+typedef struct {
+    Block* firstBlock;    // Pointer to the first block of the file
+    Block* lastBlock;     // Pointer to the last block of the file
+} File;
+
+// Function to create a block with some data
+Block* createBlock(const char* data) {
+    Block* newBlock = (Block*)malloc(sizeof(Block));
+    strncpy(newBlock->data, data, BLOCK_SIZE);
+    newBlock->data[BLOCK_SIZE - 1] = '\0';  // Ensure null-terminated string
+    newBlock->nextBlock = NULL;
+    return newBlock;
+}
+
+// Function to simulate the creation of a file with linked allocation
+void createFile(File* file) {
+    file->firstBlock = NULL;
+    file->lastBlock = NULL;
+
+    for (int i = 0; i < MAX_BLOCKS; i++) {
+        char data[BLOCK_SIZE];
+        printf("Enter data for block %d: ", i + 1);
+        fgets(data, BLOCK_SIZE, stdin);
+        data[strcspn(data, "\n")] = '\0'; // Remove the newline character
+
+        Block* newBlock = createBlock(data);
+
+        // If this is the first block, set it as the first and last block of the file
+        if (file->firstBlock == NULL) {
+            file->firstBlock = newBlock;
+            file->lastBlock = newBlock;
+        } else {
+            // Otherwise, append it to the last block
+            file->lastBlock->nextBlock = newBlock;
+            file->lastBlock = newBlock;
+        }
+    }
+}
+
+// Function to simulate reading a specific block using linked allocation
+void readBlock(File* file, int blockNumber) {
+    if (blockNumber < 1 || blockNumber > MAX_BLOCKS) {
+        printf("Error: Block number out of range.\n");
+        return;
+    }
+
+    Block* currentBlock = file->firstBlock;
+    for (int i = 1; i < blockNumber; i++) {
+        if (currentBlock == NULL) {
+            printf("Error: Reached end of file before finding the block.\n");
+            return;
+        }
+        currentBlock = currentBlock->nextBlock;
+    }
+
+    printf("Data from block %d: %s\n", blockNumber, currentBlock->data);
+}
+
+// Function to simulate reading all blocks of the file in sequence using linked allocation
+void readAllBlocks(File* file) {
+    Block* currentBlock = file->firstBlock;
+    printf("\nReading all blocks in sequence:\n");
+
+    int blockNumber = 1;
+    while (currentBlock != NULL) {
+        printf("Block %d: %s\n", blockNumber, currentBlock->data);
+        currentBlock = currentBlock->nextBlock;
+        blockNumber++;
+    }
+}
+
+int main() {
+    File file;  // Simulated file using linked allocation
+
+    // Create the file with linked allocation
+    createFile(&file);
+
+    // Read a specific block (sequential access)
+    int blockNumber;
+    printf("\nEnter the block number to read (1-%d): ", MAX_BLOCKS);
+    scanf("%d", &blockNumber);
+    getchar();  // To clear the newline character left by scanf
+    readBlock(&file, blockNumber);
+
+    // Read all blocks sequentially using linked allocation
+    readAllBlocks(&file);
+
+    // Free all dynamically allocated memory for blocks
+    Block* currentBlock = file.firstBlock;
+    while (currentBlock != NULL) {
+        Block* nextBlock = currentBlock->nextBlock;
+        free(currentBlock);
+        currentBlock = nextBlock;
+    }
+
+    return 0;
+}
