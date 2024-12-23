@@ -1,0 +1,71 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_BLOCKS 5      // Maximum number of blocks for this file
+#define BLOCK_SIZE 50     // Size of each data block
+
+// Structure to represent the file's data block
+typedef struct {
+    char data[BLOCK_SIZE]; // Data of the block (could be a string, etc.)
+} DataBlock;
+
+// Structure to represent the index block
+typedef struct {
+    int blockPointers[MAX_BLOCKS]; // Array to store pointers to data blocks
+} IndexBlock;
+
+// Function to create and initialize the file with data
+void createFile(DataBlock *file, IndexBlock *indexBlock) {
+    for (int i = 0; i < MAX_BLOCKS; i++) {
+        // Initialize data blocks
+        printf("Enter data for block %d: ", i + 1);
+        fgets(file[i].data, BLOCK_SIZE, stdin);
+        file[i].data[strcspn(file[i].data, "\n")] = '\0';  // Remove newline character
+
+        // Set the pointer in the index block
+        indexBlock->blockPointers[i] = i;  // Pointer to the data block (in this simulation, it's just the index)
+    }
+}
+
+// Function to simulate reading a specific block via the index block
+void readBlock(IndexBlock *indexBlock, DataBlock *file, int blockNumber) {
+    if (blockNumber < 1 || blockNumber > MAX_BLOCKS) {
+        printf("Error: Block number out of range.\n");
+        return;
+    }
+
+    // Get the pointer to the data block from the index block
+    int blockIndex = indexBlock->blockPointers[blockNumber - 1];
+
+    // Print the data of the block
+    printf("Data from block %d: %s\n", blockNumber, file[blockIndex].data);
+}
+
+// Function to simulate reading all blocks sequentially using the index block
+void readAllBlocks(IndexBlock *indexBlock, DataBlock *file) {
+    printf("\nReading all blocks in sequence:\n");
+    for (int i = 0; i < MAX_BLOCKS; i++) {
+        int blockIndex = indexBlock->blockPointers[i];
+        printf("Block %d: %s\n", i + 1, file[blockIndex].data);
+    }
+}
+
+int main() {
+    DataBlock file[MAX_BLOCKS];    // Simulated file with data blocks
+    IndexBlock indexBlock;         // Index block containing pointers to the data blocks
+
+    // Create the file and initialize it with blocks
+    createFile(file, &indexBlock);
+
+    // Read a specific block (indexed access)
+    int blockNumber;
+    printf("\nEnter the block number to read (1-%d): ", MAX_BLOCKS);
+    scanf("%d", &blockNumber);
+    getchar();  // Clear the newline character left by scanf
+    readBlock(&indexBlock, file, blockNumber);
+
+    // Read all blocks sequentially using the index block
+    readAllBlocks(&indexBlock, file);
+
+    return 0;
+}
