@@ -1,0 +1,102 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define FRAME_SIZE 3  // Number of frames in memory
+
+// Function to simulate Optimal Paging technique
+void optimalPaging(int pages[], int numPages) {
+    int frame[FRAME_SIZE];
+    int pageFaults = 0, pageHits = 0;
+
+    // Initialize the frame with -1 (indicating empty frames)
+    for (int i = 0; i < FRAME_SIZE; i++) {
+        frame[i] = -1;
+    }
+
+    printf("Simulating Optimal Paging with frame size %d\n", FRAME_SIZE);
+    printf("Page Accesses: ");
+
+    // Iterate through the page accesses
+    for (int i = 0; i < numPages; i++) {
+        int page = pages[i];
+        int found = 0;  // Flag to check if the page is found in memory
+
+        // Check if the page is already in memory
+        for (int j = 0; j < FRAME_SIZE; j++) {
+            if (frame[j] == page) {
+                found = 1;  // Page found, it's a page hit
+                pageHits++;
+                break;
+            }
+        }
+
+        if (!found) {
+            // Page fault occurs, replace the page using optimal strategy
+            pageFaults++;
+
+            // Find the page that will not be used for the longest time in the future
+            int farthest = -1, indexToReplace = -1;
+            for (int j = 0; j < FRAME_SIZE; j++) {
+                int nextUse = -1;
+                // Check when each page in memory will be used again in future
+                for (int k = i + 1; k < numPages; k++) {
+                    if (frame[j] == pages[k]) {
+                        nextUse = k;
+                        break;
+                    }
+                }
+
+                // If the page is not used in the future or is used last, replace it
+                if (nextUse == -1) {
+                    indexToReplace = j;
+                    break;
+                }
+
+                // Otherwise, find the page that is used last in the future
+                if (nextUse > farthest) {
+                    farthest = nextUse;
+                    indexToReplace = j;
+                }
+            }
+
+            // Replace the selected page with the new page
+            frame[indexToReplace] = page;
+
+            // Print the current state of the frames
+            printf(" [");
+            for (int j = 0; j < FRAME_SIZE; j++) {
+                if (frame[j] != -1) {
+                    printf("%d ", frame[j]);
+                } else {
+                    printf(" - ");
+                }
+            }
+            printf("] -> Page Fault (New Page: %d)\n", page);
+        } else {
+            // Page hit, no need to replace anything
+            printf(" [");
+            for (int j = 0; j < FRAME_SIZE; j++) {
+                if (frame[j] != -1) {
+                    printf("%d ", frame[j]);
+                } else {
+                    printf(" - ");
+                }
+            }
+            printf("] -> Page Hit (Page: %d)\n", page);
+        }
+    }
+
+    printf("\nTotal Page Faults: %d\n", pageFaults);
+    printf("Total Page Hits: %d\n", pageHits);
+}
+
+int main() {
+    // Sequence of page accesses (as an example)
+    int pages[] = {7, 0, 1, 2, 0, 3, 0, 4, 2, 3, 0};
+    int numPages = sizeof(pages) / sizeof(pages[0]);
+
+    // Simulate Optimal Paging algorithm
+    optimalPaging(pages, numPages);
+
+    return 0;
+}
