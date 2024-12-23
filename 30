@@ -1,0 +1,61 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+#include <unistd.h>
+
+// Function to be executed by the thread
+void* thread_function(void* arg) {
+    int* thread_id = (int*)arg;
+    printf("Thread %d is executing.\n", *thread_id);
+    sleep(1);  // Simulate some work with a delay
+    printf("Thread %d finished execution.\n", *thread_id);
+    pthread_exit(NULL);  // Exit the thread
+}
+
+int main() {
+    pthread_t thread1, thread2;  // Declare two thread variables
+    int thread_id1 = 1, thread_id2 = 2;  // Thread IDs (just for demonstration)
+    int result;
+
+    // (i) Create threads
+    printf("Creating thread 1...\n");
+    result = pthread_create(&thread1, NULL, thread_function, (void*)&thread_id1);
+    if (result != 0) {
+        perror("Error creating thread 1");
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Creating thread 2...\n");
+    result = pthread_create(&thread2, NULL, thread_function, (void*)&thread_id2);
+    if (result != 0) {
+        perror("Error creating thread 2");
+        exit(EXIT_FAILURE);
+    }
+
+    // (ii) Join threads (Wait for both threads to finish)
+    printf("Waiting for thread 1 to finish...\n");
+    result = pthread_join(thread1, NULL);
+    if (result != 0) {
+        perror("Error joining thread 1");
+        exit(EXIT_FAILURE);
+    }
+
+    printf("Waiting for thread 2 to finish...\n");
+    result = pthread_join(thread2, NULL);
+    if (result != 0) {
+        perror("Error joining thread 2");
+        exit(EXIT_FAILURE);
+    }
+
+    // (iii) Equal: Check if thread1 and thread2 are equal
+    if (pthread_equal(thread1, thread2)) {
+        printf("Thread 1 and Thread 2 are the same thread.\n");
+    } else {
+        printf("Thread 1 and Thread 2 are different threads.\n");
+    }
+
+    // (iv) Exit: The threads will exit using pthread_exit in the thread_function.
+
+    printf("Main thread is exiting.\n");
+    return 0;
+}
