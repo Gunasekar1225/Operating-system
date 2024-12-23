@@ -1,0 +1,111 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_TRACKS 500
+
+// Function to perform SCAN Disk Scheduling
+int scanDiskScheduling(int requests[], int num_requests, int initial_position, int direction) {
+    int total_head_movement = 0;
+    int current_position = initial_position;
+
+    // Create an array to store the tracks that need to be serviced
+    int tracks[MAX_TRACKS];
+    int track_count = 0;
+
+    // Mark all requested tracks
+    for (int i = 0; i < num_requests; i++) {
+        tracks[track_count++] = requests[i];
+    }
+
+    // Sort the tracks array
+    for (int i = 0; i < track_count - 1; i++) {
+        for (int j = i + 1; j < track_count; j++) {
+            if (tracks[i] > tracks[j]) {
+                int temp = tracks[i];
+                tracks[i] = tracks[j];
+                tracks[j] = temp;
+            }
+        }
+    }
+
+    // Add the initial position to the list of tracks and sort the list
+    tracks[track_count++] = initial_position;
+    for (int i = 0; i < track_count - 1; i++) {
+        for (int j = i + 1; j < track_count; j++) {
+            if (tracks[i] > tracks[j]) {
+                int temp = tracks[i];
+                tracks[i] = tracks[j];
+                tracks[j] = temp;
+            }
+        }
+    }
+
+    // Now, perform the SCAN based on the initial direction
+    int start_index;
+    for (start_index = 0; start_index < track_count; start_index++) {
+        if (tracks[start_index] == initial_position) {
+            break;
+        }
+    }
+
+    // Direction = 1 means right, -1 means left
+    if (direction == 1) {
+        // Service tracks in the right direction (larger tracks first)
+        for (int i = start_index; i < track_count; i++) {
+            total_head_movement += abs(current_position - tracks[i]);
+            current_position = tracks[i];
+        }
+        // Reverse direction and service tracks in the left direction
+        total_head_movement += abs(current_position - tracks[track_count - 1]);
+        current_position = tracks[track_count - 1];
+        for (int i = start_index - 1; i >= 0; i--) {
+            total_head_movement += abs(current_position - tracks[i]);
+            current_position = tracks[i];
+        }
+    } else {
+        // Service tracks in the left direction (smaller tracks first)
+        for (int i = start_index; i >= 0; i--) {
+            total_head_movement += abs(current_position - tracks[i]);
+            current_position = tracks[i];
+        }
+        // Reverse direction and service tracks in the right direction
+        total_head_movement += abs(current_position - tracks[0]);
+        current_position = tracks[0];
+        for (int i = start_index + 1; i < track_count; i++) {
+            total_head_movement += abs(current_position - tracks[i]);
+            current_position = tracks[i];
+        }
+    }
+
+    return total_head_movement;
+}
+
+int main() {
+    int num_requests, initial_position, direction;
+
+    // Input the number of requests and initial disk head position
+    printf("Enter the number of disk requests: ");
+    scanf("%d", &num_requests);
+
+    int requests[num_requests];
+
+    // Input the track numbers for the requests
+    printf("Enter the track numbers for the requests:\n");
+    for (int i = 0; i < num_requests; i++) {
+        scanf("%d", &requests[i]);
+    }
+
+    // Input the initial position of the disk head and the direction of movement
+    printf("Enter the initial position of the disk head: ");
+    scanf("%d", &initial_position);
+    printf("Enter the direction of the disk head movement (1 for right, -1 for left): ");
+    scanf("%d", &direction);
+
+    // Calculate the total head movement using SCAN
+    int total_head_movement = scanDiskScheduling(requests, num_requests, initial_position, direction);
+
+    // Output the total head movement
+    printf("\nTotal head movement: %d\n", total_head_movement);
+
+    return 0;
+}
