@@ -1,0 +1,67 @@
+#include <stdio.h>
+
+#define MAX_BLOCKS 10
+#define MAX_PROCESSES 5
+
+// Structure to represent a memory block
+struct Block {
+    int size;    // Size of the block
+    int isFree;  // 1 if the block is free, 0 if it is allocated
+};
+
+// Function to allocate memory using Worst-Fit algorithm
+void worstFit(struct Block blocks[], int m, int processes[], int n) {
+    // Array to store allocation of processes
+    int allocation[n];
+
+    // Initialize allocation array to -1 (indicating no allocation)
+    for (int i = 0; i < n; i++) {
+        allocation[i] = -1;
+    }
+
+    // Traverse each process
+    for (int i = 0; i < n; i++) {
+        int worstIdx = -1;
+
+        // Find the largest block that is large enough for the current process
+        for (int j = 0; j < m; j++) {
+            if (blocks[j].isFree == 1 && blocks[j].size >= processes[i]) {
+                if (worstIdx == -1 || blocks[worstIdx].size < blocks[j].size) {
+                    worstIdx = j;
+                }
+            }
+        }
+
+        // If a block was found, allocate the process to that block
+        if (worstIdx != -1) {
+            allocation[i] = worstIdx;
+            blocks[worstIdx].size -= processes[i];  // Decrease the size of the block
+            if (blocks[worstIdx].size == 0) {
+                blocks[worstIdx].isFree = 0;  // Mark block as allocated if no space left
+            }
+        }
+    }
+
+    // Print the allocation result
+    printf("\nProcess No.\tProcess Size\tBlock No.\tBlock Size\n");
+    for (int i = 0; i < n; i++) {
+        if (allocation[i] != -1) {
+            printf("%d\t\t%d\t\t%d\t\t%d\n", i + 1, processes[i], allocation[i] + 1, blocks[allocation[i]].size);
+        } else {
+            printf("%d\t\t%d\t\tNot Allocated\n", i + 1, processes[i]);
+        }
+    }
+}
+
+int main() {
+    struct Block blocks[MAX_BLOCKS] = {
+        {100, 1}, {500, 1}, {200, 1}, {300, 1}, {600, 1},
+        {350, 1}, {150, 1}, {800, 1}, {250, 1}, {100, 1}
+    };
+
+    int processes[MAX_PROCESSES] = {212, 417, 112, 426, 65};
+
+    printf("Worst Fit Memory Allocation\n");
+
+    // Call the Worst-Fit function
+    worstFit(blocks, MAX_BLOCKS, proces
