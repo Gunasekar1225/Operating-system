@@ -1,0 +1,28 @@
+#include <stdio.h>
+
+typedef struct {
+    int process_id;
+    int burst_time;
+    int remaining_time; // For preemptive scheduling
+    int priority;
+    int waiting_time;
+    int turnaround_time;
+    int start_time;
+} Process;
+
+// Function to sort the processes by priority
+void sort_by_priority(Process processes[], int n) {
+    Process temp;
+    for (int i = 0; i < n - 1; i++) {
+        for (int j = i + 1; j < n; j++) {
+            if (processes[i].priority > processes[j].priority) {
+                // Swap processes[i] and processes[j]
+                temp = processes[i];
+                processes[i] = processes[j];
+                processes[j] = temp;
+            }
+        }
+    }
+}
+
+// Function to calculate waiting and turnaround ti
