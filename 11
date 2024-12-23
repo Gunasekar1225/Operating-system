@@ -1,0 +1,37 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <pthread.h>
+
+// Function to be executed by each thread
+void* print_message(void* thread_id) {
+    long tid = (long) thread_id;  // Cast the thread_id to long
+    printf("Hello from thread %ld\n", tid);
+    return NULL;
+}
+
+int main() {
+    pthread_t threads[5];  // Array to hold thread identifiers
+    int rc;
+    long t;
+
+    // Create 5 threads
+    for (t = 0; t < 5; t++) {
+        rc = pthread_create(&threads[t], NULL, print_message, (void*)t);
+        if (rc) {
+            printf("Error creating thread %ld, return code: %d\n", t, rc);
+            exit(-1);
+        }
+    }
+
+    // Wait for all threads to complete
+    for (t = 0; t < 5; t++) {
+        rc = pthread_join(threads[t], NULL);  // Wait for thread to finish
+        if (rc) {
+            printf("Error joining thread %ld, return code: %d\n", t, rc);
+            exit(-1);
+        }
+    }
+
+    printf("Main thread finished executing\n");
+    return 0;
+}
