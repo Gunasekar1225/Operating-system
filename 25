@@ -1,0 +1,83 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <fcntl.h>
+#include <unistd.h>
+#include <sys/types.h>
+#include <sys/stat.h>
+#include <dirent.h>
+#include <string.h>
+
+// Function to display file information using stat()
+void displayFileStats(const char* fileName) {
+    struct stat fileStat;
+    
+    if (stat(fileName, &fileStat) == -1) {
+        perror("stat failed");
+        return;
+    }
+
+    printf("File: %s\n", fileName);
+    printf("File size: %ld bytes\n", fileStat.st_size);
+    printf("File permissions: %o\n", fileStat.st_mode & 0777);  // Display permissions in octal
+    printf("Last access time: %ld\n", fileStat.st_atime);
+    printf("Last modification time: %ld\n", fileStat.st_mtime);
+    printf("Last status change time: %ld\n", fileStat.st_ctime);
+}
+
+// Function to demonstrate fcntl() for file descriptor manipulation
+void fileDescriptorControl(int fd) {
+    int flags;
+
+    // Get current file descriptor flags
+    flags = fcntl(fd, F_GETFL);
+    if (flags == -1) {
+        perror("fcntl failed");
+        return;
+    }
+    printf("Current file descriptor flags: %d\n", flags);
+
+    // Set the file descriptor to non-blocking mode
+    if (fcntl(fd, F_SETFL, O_NONBLOCK) == -1) {
+        perror("fcntl failed to set non-blocking");
+        return;
+    }
+    printf("File descriptor set to non-blocking mode.\n");
+}
+
+// Function to demonstrate lseek()
+void demonstrateLseek(int fd) {
+    off_t offset;
+
+    // Seek to the 10th byte in the file
+    offset = lseek(fd, 10, SEEK_SET);
+    if (offset == (off_t)-1) {
+        perror("lseek failed");
+        return;
+    }
+    printf("File pointer moved to byte %ld\n", offset);
+}
+
+// Function to demonstrate opendir() and readdir()
+void listDirectoryContents(const char* dirName) {
+    DIR *dir = opendir(dirName);
+    struct dirent *entry;
+
+    if (dir == NULL) {
+        perror("opendir failed");
+        return;
+    }
+
+    printf("Listing contents of directory: %s\n", dirName);
+    while ((entry = readdir(dir)) != NULL) {
+        printf("File: %s\n", entry->d_name);
+    }
+
+    closedir(dir);
+}
+
+int main() {
+    // 1. Open a file using open() system call
+    const char* fileName = "example.txt";
+    int fd = open(fileName, O_CREAT | O_RDWR, 0644);  // Create the file if it doesn't exist
+    if (fd == -1) {
+        perror(
