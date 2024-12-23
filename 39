@@ -1,0 +1,106 @@
+#include <stdio.h>
+#include <stdlib.h>
+
+#define MAX_TRACKS 500
+
+// Function to perform C-SCAN Disk Scheduling
+int cscanDiskScheduling(int requests[], int num_requests, int initial_position, int direction, int max_tracks) {
+    int total_head_movement = 0;
+    int current_position = initial_position;
+
+    // Create an array to store the tracks that need to be serviced
+    int tracks[MAX_TRACKS];
+    int track_count = 0;
+
+    // Mark all requested tracks
+    for (int i = 0; i < num_requests; i++) {
+        tracks[track_count++] = requests[i];
+    }
+
+    // Add the initial position to the list of tracks
+    tracks[track_count++] = initial_position;
+
+    // Sort the tracks array
+    for (int i = 0; i < track_count - 1; i++) {
+        for (int j = i + 1; j < track_count; j++) {
+            if (tracks[i] > tracks[j]) {
+                int temp = tracks[i];
+                tracks[i] = tracks[j];
+                tracks[j] = temp;
+            }
+        }
+    }
+
+    // Now, perform the C-SCAN based on the initial direction
+    int start_index;
+    for (start_index = 0; start_index < track_count; start_index++) {
+        if (tracks[start_index] == initial_position) {
+            break;
+        }
+    }
+
+    // Direction = 1 means right, -1 means left
+    if (direction == 1) {
+        // Service tracks in the right direction (larger tracks first)
+        for (int i = start_index; i < track_count; i++) {
+            total_head_movement += abs(current_position - tracks[i]);
+            current_position = tracks[i];
+        }
+        // After reaching the end, jump to the lowest track (circular motion)
+        total_head_movement += abs(current_position - tracks[0]);
+        current_position = tracks[0];
+        // Continue servicing tracks in the right direction
+        for (int i = 1; i < start_index; i++) {
+            total_head_movement += abs(current_position - tracks[i]);
+            current_position = tracks[i];
+        }
+    } else {
+        // Service tracks in the left direction (smaller tracks first)
+        for (int i = start_index; i >= 0; i--) {
+            total_head_movement += abs(current_position - tracks[i]);
+            current_position = tracks[i];
+        }
+        // After reaching the start, jump to the highest track (circular motion)
+        total_head_movement += abs(current_position - tracks[track_count - 1]);
+        current_position = tracks[track_count - 1];
+        // Continue servicing tracks in the left direction
+        for (int i = track_count - 2; i >= start_index; i--) {
+            total_head_movement += abs(current_position - tracks[i]);
+            current_position = tracks[i];
+        }
+    }
+
+    return total_head_movement;
+}
+
+int main() {
+    int num_requests, initial_position, direction, max_tracks;
+
+    // Input the number of requests and the maximum number of tracks
+    printf("Enter the number of disk requests: ");
+    scanf("%d", &num_requests);
+
+    int requests[num_requests];
+
+    // Input the track numbers for the requests
+    printf("Enter the track numbers for the requests:\n");
+    for (int i = 0; i < num_requests; i++) {
+        scanf("%d", &requests[i]);
+    }
+
+    // Input the initial position of the disk head, direction of movement, and max tracks
+    printf("Enter the initial position of the disk head: ");
+    scanf("%d", &initial_position);
+    printf("Enter the direction of the disk head movement (1 for right, -1 for left): ");
+    scanf("%d", &direction);
+    printf("Enter the maximum number of tracks on the disk: ");
+    scanf("%d", &max_tracks);
+
+    // Calculate the total head movement using C-SCAN
+    int total_head_movement = cscanDiskScheduling(requests, num_requests, initial_position, direction, max_tracks);
+
+    // Output the total head movement
+    printf("\nTotal head movement: %d\n", total_head_movement);
+
+    return 0;
+}
