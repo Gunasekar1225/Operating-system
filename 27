@@ -1,0 +1,87 @@
+#include <stdio.h>
+#include <stdlib.h>
+#include <dirent.h>
+#include <sys/stat.h>
+#include <unistd.h>
+#include <pwd.h>
+#include <grp.h>
+#include <time.h>
+
+void print_file_info(const char *path, const char *filename) {
+    struct stat file_stat;
+    char full_path[1024];
+
+    // Construct the full path to the file
+    snprintf(full_path, sizeof(full_path), "%s/%s", path, filename);
+
+    // Get file information
+    if (stat(full_path, &file_stat) == -1) {
+        perror("Error getting file stats");
+        return;
+    }
+
+    // Print file permissions
+    printf((S_ISDIR(file_stat.st_mode)) ? "d" : "-");
+    printf((file_stat.st_mode & S_IRUSR) ? "r" : "-");
+    printf((file_stat.st_mode & S_IWUSR) ? "w" : "-");
+    printf((file_stat.st_mode & S_IXUSR) ? "x" : "-");
+    printf((file_stat.st_mode & S_IRGRP) ? "r" : "-");
+    printf((file_stat.st_mode & S_IWGRP) ? "w" : "-");
+    printf((file_stat.st_mode & S_IXGRP) ? "x" : "-");
+    printf((file_stat.st_mode & S_IROTH) ? "r" : "-");
+    printf((file_stat.st_mode & S_IWOTH) ? "w" : "-");
+    printf((file_stat.st_mode & S_IXOTH) ? "x" : "-");
+
+    // Print number of hard links
+    printf(" %ld", file_stat.st_nlink);
+
+    // Print the owner name
+    struct passwd *pwd = getpwuid(file_stat.st_uid);
+    printf(" %-8s", (pwd != NULL) ? pwd->pw_name : "UNKNOWN");
+
+    // Print the group name
+    struct group *grp = getgrgid(file_stat.st_gid);
+    printf(" %-8s", (grp != NULL) ? grp->gr_name : "UNKNOWN");
+
+    // Print file size
+    printf(" %8ld", file_stat.st_size);
+
+    // Print last modification time
+    char time_buff[20];
+    strftime(time_buff, sizeof(time_buff), "%b %d %H:%M", localtime(&file_stat.st_mtime));
+    printf(" %s", time_buff);
+
+    // Print the filename
+    printf(" %s\n", filename);
+}
+
+void list_directory(const char *dir_name) {
+    DIR *dir = opendir(dir_name);
+    if (dir == NULL) {
+        perror("Unable to open directory");
+        exit(1);
+    }
+
+    struct dirent *entry;
+    while ((entry = readdir(dir)) != NULL) {
+        // Skip the "." and ".." entries
+        if (entry->d_name[0] != '.') {
+            print_file_info(dir_name, entry->d_name);
+        }
+    }
+
+    closedir(dir);
+}
+
+int main(int argc, char *argv[]) {
+    const char *dir_name = ".";  // Default to current directory
+
+    // Check if a directory is specified as a command-line argument
+    if (argc > 1) {
+        dir_name = argv[1];
+    }
+
+    list_directory(dir_name);
+
+    return 0;
+}
